@@ -9,14 +9,17 @@ import pandas as pd
 # The Kaggle data has been downloaded to a local directory 
 train_data_filepath = './data/train.csv'
 
-data = pd.read_csv(train_data_filepath )
+# the variable data will contain a panda DataFrame
+df = pd.read_csv(train_data_filepath )
 
 # Let's plot some data
 
-gender   = data['Sex']
-survival = data['Survived']
+df_gender = df[['Sex','Survived']]
 
-#plots = pd.scatter_matrix(data)
+axes = df_gender.hist(by='Sex')
 
+for ax in axes:
+    ax.set_xticks([0,1])
+    ax.set_xticklabels(['Dead','Alive'])
 
-#plt.show()
+plt.show()
