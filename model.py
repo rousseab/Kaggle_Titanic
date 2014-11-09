@@ -8,15 +8,15 @@ import pandas as pd
 
 class basemodel(object):
 
-    def __init__(self,train_data_path= './data/train.csv',test_data_path='./data/test.csv')
+    def __init__(self,train_data_filename= './data/train.csv',test_data_filename='./data/test.csv'):
         """
         Read in the training data in pandas,
         """
 
         # read the data. Getting everything in RAM this way is not a good idea for
         # large datasets, but we are playing with tens of kb here. 
-        self.df_train = pd.read_csv(train_data_filepath )
-        self.df_test  = pd.read_csv(test_data_filepath )
+        self.df_train = pd.read_csv(train_data_filename)
+        self.df_test  = pd.read_csv(test_data_filename)
 
 
     def train_model(self):
@@ -35,7 +35,8 @@ class basemodel(object):
         """
 
         try:
-            self.df_prediction.to_csv(prediction_filename)
+            # write only two columns, and not the index!
+            self.df_prediction.to_csv(prediction_filename,columns=['PassengerId','Survived'],index=False)
         except:
             print 'ERROR: cannot write prediction. Did you train the model?'
 
