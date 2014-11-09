@@ -42,6 +42,11 @@ class visualize(object):
 
         df_survival = pd.DataFrame(survival_dict)
         print df_survival 
+        for gender in genders:
+            survival_rate = df_survival[gender]['Survived']/(1.*df_survival[gender].sum())
+            print '%s survival rate: %4.1f '%(gender,100.*survival_rate)
+
+
         df_survival.plot(kind='bar', stacked=True,title='Survival of the Titanic disaster, by gender')
 
 
@@ -75,16 +80,73 @@ class visualize(object):
         children_df_survival = pd.DataFrame(children_survival_dict)
         print '\nADULTS'
         print adult_df_survival    
+        for gender in genders:
+            survival_rate = adult_df_survival[gender]['Survived']/(1.*adult_df_survival[gender].sum())
+            print '%s survival rate: %4.1f '%(gender,100.*survival_rate)
+
+
         print '\nChildren'
         print children_df_survival    
+        for gender in genders:
+            survival_rate = children_df_survival[gender]['Survived']/(1.*children_df_survival[gender].sum())
+            print '%s survival rate: %4.1f '%(gender,100.*survival_rate)
 
         adult_df_survival.plot(kind='bar', stacked=True,title='Survival of the Titanic disaster, for ADULTS by gender')
         children_df_survival.plot(kind='bar', stacked=True,title='Survival of the Titanic disaster, for CHILDREN by gender')
 
 
+
         plt.show()
+        return adult_df_survival    
+
+
+    def show_survival_by_class_gender_price(self):
+        """
+        Let's visualize survival by gender, class and price paid for the ticket.
+
+        This corresponds to the third part of the "Getting Started with Excel" tutorial.
+
+        """
+
+        max_fare = self.df['Fare'].max()+1.
+
+        # We create a 2 x 3 x 4 set of limits. We will wish to bin survival and death
+        # according to these variables 
+        genders      = ['male','female']
+        clses        = [1,2,3]
+        Fare_limits  = [[0.,10],[10,20],[20,30],[30,max_fare]]
+
+        print '#Fare limits ($)       Class         Gender       Survived    Died    survival rate (%)'
+        print '======================================================================================='
+        for farel in Fare_limits:
+            cf = ( self.df['Fare'] >= farel[0] ) & (self.df['Fare'] < farel[1] )
+            print ' %2.1f -- %2.1f'%(farel[0],farel[1])
+            for cl in clses:
+                cc =  self.df['Pclass'] == cl
+                print '                         %i'%cl
+                for gender in genders:
+                    cg =  self.df['Sex'] == gender
+
+                    condition = cf & cc & cg
+
+                    val = self.df[condition]['Survived'].values
+
+                    survived = N.sum(val == 1)
+                    died     = N.sum(val == 0)
+
+                    total = died+survived
+
+                    if total > 0:
+                        rate = 100*(1.*survived)/(1.*total)
+                    else:                            
+                        rate = 0.
+
+                    print '                                     %8s         %3i    %3i          %4.1f'%(gender, survived, died,rate)
+
 
 if __name__ == "__main__":
     V = visualize()
     #V.show_survival_by_gender()
-    V.show_survival_by_age_and_gender()
+    #adult_df_survival    = V.show_survival_by_age_and_gender()
+
+    V.show_survival_by_class_gender_price()
