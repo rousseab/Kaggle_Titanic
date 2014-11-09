@@ -16,8 +16,9 @@ df = pd.read_csv(train_data_filepath )
 
 
 # Let's visualize survival by genders
-# To use the pandas plotting facilities (which are just wrappers around matplotlib)
-# we must build a dataframe which contains the data in the right format
+# - This corresponds to the first part of the "Getting Started with Excel" tutorial
+# - To use the pandas plotting facilities (which are just wrappers around matplotlib)
+#   we must build a dataframe which contains the data in the right format
 
 genders = ['male','female']
 survival_dict = {}
