@@ -4,9 +4,9 @@
 #
 #================================================================================
 import pandas as pd
-from model import basemodel 
+from model import BaseModel 
 
-class genderbasedmodel(basemodel):
+class GenderModel(BaseModel):
 
     def train_model(self):
         """
@@ -33,6 +33,6 @@ class genderbasedmodel(basemodel):
 if __name__ == "__main__":
     # If this file is invoked directly by python (as opposed to imported in another file)
     # execute what follows 
-    model = genderbasedmodel()
+    model = GenderModel()
     model.train_model() 
-    model.write_prediction( prediction_filename = 'genderbasedmodel.csv')
+    model.write_prediction( prediction_filename = 'GenderModel.csv')
