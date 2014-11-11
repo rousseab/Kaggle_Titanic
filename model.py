@@ -6,7 +6,7 @@
 #================================================================================
 import pandas as pd
 
-class basemodel(object):
+class BaseModel(object):
 
     def __init__(self,train_data_filename= './data/train.csv',test_data_filename='./data/test.csv'):
         """
