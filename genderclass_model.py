@@ -5,9 +5,9 @@
 #================================================================================
 import pandas as pd
 import numpy as N
-from model import basemodel 
+from model import BaseModel 
 
-class genderclassmodel(basemodel):
+class GenderClassModel(BaseModel):
 
 
     def build_survival_table(self):
@@ -131,8 +131,6 @@ class genderclassmodel(basemodel):
         genders = self.df_test['Sex']
         fares   = self.df_test['Fare']
         cls     = self.df_test['Pclass']
-        
- 
 
         survival = []
         for passenger_gender,passenger_class,passenger_fare in zip(genders,cls,fares):
@@ -147,6 +145,6 @@ class genderclassmodel(basemodel):
 if __name__ == "__main__":
     # If this file is invoked directly by python (as opposed to imported in another file)
     # execute what follows 
-    model = genderclassmodel()
+    model = GenderClassModel()
     model.train_model() 
-    model.write_prediction( prediction_filename = 'genderclassmodel.csv')
+    model.write_prediction( prediction_filename = 'GenderClassModel.csv')
