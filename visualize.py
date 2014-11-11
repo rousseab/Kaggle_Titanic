@@ -121,6 +121,7 @@ class visualize(object):
         for farel in Fare_limits:
             cf = ( self.df['Fare'] >= farel[0] ) & (self.df['Fare'] < farel[1] )
             print ' %2.1f -- %2.1f'%(farel[0],farel[1])
+
             for cl in clses:
                 cc =  self.df['Pclass'] == cl
                 print '                         %i'%cl
