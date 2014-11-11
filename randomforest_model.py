@@ -9,10 +9,10 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
-from model import basemodel 
+from model import BaseModel 
 
 
-class randomforestmodel(basemodel):
+class RandomForestModel(BaseModel):
 
     def clean_data(self,df):
         """
@@ -91,6 +91,6 @@ class randomforestmodel(basemodel):
 
 
 if __name__=='__main__':
-    model = randomforestmodel()
+    model = RandomForestModel()
     model.train_model(n_estimators=100)
     model.write_prediction( prediction_filename = 'RandomForestModel.csv')
