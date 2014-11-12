@@ -32,7 +32,9 @@ class RandomForestModel(BaseModel):
         # DataFRame.mode() returns the most frequent object in a set
         # here Embarked.mode.values is a numpy.ndarray type (what pandas use to store strings) 
         if len(df.Embarked[ df.Embarked.isnull() ]) > 0:
-            df.Embarked[ df.Embarked.isnull() ] = df.Embarked.dropna().mode().values
+            most_common_value = df.Embarked.dropna().mode().values[0]
+            df.loc[df.Embarked.isnull(),'Embarked'] = most_common_value 
+
         # The following line produces [(0, 'C'), (1, 'Q'), (2, 'S')]
         #Ports = list(enumerate(np.unique(df['Embarked'])))
         # Create dic {port(char): port(int)}
@@ -92,5 +94,5 @@ class RandomForestModel(BaseModel):
 
 if __name__=='__main__':
     model = RandomForestModel()
-    model.train_model(n_estimators=100)
+    model.train_model(n_estimators=10)
     model.write_prediction( prediction_filename = 'RandomForestModel.csv')
