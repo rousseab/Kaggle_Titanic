@@ -116,21 +116,34 @@ class visualize(object):
         clses        = [1,2,3]
         Fare_limits  = [[0.,10],[10,20],[20,30],[30,max_fare]]
 
+        survival_dic = {}
+        df_survival_dic = {}
+
         print '#Fare limits ($)       Class         Gender       Survived    Died    survival rate (%)'
         print '======================================================================================='
         for farel in Fare_limits:
             cf = ( self.df['Fare'] >= farel[0] ) & (self.df['Fare'] < farel[1] )
             print ' %2.1f -- %2.1f'%(farel[0],farel[1])
-
+            survival_dic[farel[0]] = {}
+            df_survival_dic[farel[0]] = {}
+            
             for cl in clses:
                 cc =  self.df['Pclass'] == cl
                 print '                         %i'%cl
+                survival_dic[farel[0]][cl] = {}
+                df_survival_dic[farel[0]][cl] = {}
                 for gender in genders:
                     cg =  self.df['Sex'] == gender
 
                     condition = cf & cc & cg
 
                     val = self.df[condition]['Survived'].values
+
+                    survival_dic[farel[0]][cl][gender] = {'Died': N.sum(val == 0), 'Survived':N.sum(val == 1) }
+                    if len(survival_dic[farel[0]][cl]) >1:
+                        ititle = 'Class:{0}, fare:[{1},{2}]'.format(cl, round(farel[0],0), round(farel[1],0))
+                        df_survival_dic[farel[0]][cl]    = pd.DataFrame(survival_dic[farel[0]][cl])
+                        df_survival_dic[farel[0]][cl].plot(kind='bar', stacked=True,title=ititle)
 
                     survived = N.sum(val == 1)
                     died     = N.sum(val == 0)
@@ -144,6 +157,7 @@ class visualize(object):
 
                     print '                                     %8s         %3i    %3i          %4.1f'%(gender, survived, died,rate)
 
+        plt.show()
 
 if __name__ == "__main__":
     V = visualize()
