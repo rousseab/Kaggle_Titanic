@@ -6,6 +6,7 @@
 
 
 import pandas as pd
+import random
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
@@ -118,7 +119,6 @@ class RandomForestModel(BaseModel):
         
         return df
 
-
     def train_model(self,n_estimators=100):
         """
         Overload the base class generic method with a specific one.
@@ -150,8 +150,145 @@ class RandomForestModel(BaseModel):
 
         self.df_prediction = pd.DataFrame({'PassengerId':ids,'Survived':survival}) 
 
+    def check_model(self,n_estimators=100,train_fraction=0.7):
+        """
+        Trains a fraction of the data frame sample
+        and checks the performance on the rest of the sample
+        Default fraction for training is as suggested by Andrew Ng in his ML course.
+
+        Code inspired from JF Rajotte's implementation.
+        """
+
+        # fraction of data used for training
+        ntrain = int(train_fraction*len(self.df_train))
+
+
+        # extract a RANDOM set of indices, of dimension ntrain
+
+        all_indices = np.arange(len(self.df_train))
+
+        train_indices = np.sort(random.sample(all_indices, ntrain))
+        test_indices  = np.setdiff1d(all_indices,train_indices )
+
+        # replace the training and testing dataframe by
+        # subgroups of the original training set
+        # careful! we are overwritting, order matters here
+
+        # note the cryptic idioms; simple slicing doesn't work.
+        self.df_test  = self.df_train[ self.df_train.index.isin(test_indices)]
+
+        test_survival = self.df_test.Survived.values
+
+        # algorithm expects the Survived column to be missing from the testing data
+        self.df_test = self.df_test.drop(['Survived'], axis=1)
+
+        self.df_train = self.df_train[ self.df_train.index.isin(train_indices)]
+
+        # we can call the original routine, the data has been overwritten to fit 
+        # our purpose
+        self.train_model(n_estimators)
+
+        # extract the survival info from the prediction
+        computed_survival = self.df_prediction.Survived.values
+
+        #Prediction result variables
+        true_positive  = 0
+        true_negative  = 0
+        false_positive = 0
+        false_negative = 0
+
+        #Loop over all passagers and fill the prediction results variables
+        for ts, cs in zip(test_survival,computed_survival):
+            if ts == 1 and cs == 1:
+                true_positive  += 1
+            elif ts == 1 and cs == 0:
+                false_positive  += 1
+            elif ts == 0 and cs == 1:
+                false_negative  += 1
+            elif ts == 0 and cs == 0:
+                true_negative += 1
+
+        ##Now compute some stats
+        self.accuracy = float(true_positive + true_negative)/float(true_positive + true_negative + false_positive + false_negative)
+        self.precision = float(true_positive)/float(true_positive + false_positive)
+        self.recall = float(true_positive)/float(true_positive + false_negative)
+        self.f1score = 2*self.precision*self.recall/(self.precision + self.recall)
+
+        print '\n\n\n' + 20*'---' + '\nTraining performance summary:\n'
+        print 'True positive\t{0}'.format(true_positive)
+        print 'True negative\t{0}'.format(true_negative)
+        print 'False positive\t{0}'.format(false_positive)
+        print 'False negative\t{0}'.format(false_negative)
+
+        print '\nAccuracy:\t{0}'.format(round(self.accuracy, 2))
+        print 'Precision:\t{0}'.format(round(self.precision, 2))
+        print 'Recall: \t{0}'.format(round(self.recall, 2))
+        print 'F1Score:\t{0}'.format(round(self.f1score,2))
+
+
 
 if __name__=='__main__':
-    model = RandomForestModel()
-    model.train_model(n_estimators=10)
-    model.write_prediction( prediction_filename = 'RandomForestModel.csv')
+
+    n_average = 50
+
+    n_estimators  = 50
+    list_train_fraction = np.arange(0.2,0.8,0.025)
+    list_x        = []
+    list_accuracy = []
+    list_precision= []
+    list_F1       = []
+
+    for train_fraction in list_train_fraction: 
+
+        accuracy  = 0.
+        precision = 0.
+        f1score   = 0.
+        for i in np.arange(n_average):
+            model = RandomForestModel()
+            model.check_model(n_estimators=n_estimators, train_fraction=train_fraction)
+
+            accuracy  += model.accuracy
+            precision += model.precision
+            f1score   += model.f1score 
+
+
+        list_x.append( len(model.df_train) )
+
+        list_accuracy.append(accuracy/n_average)
+        list_precision.append(precision/n_average)
+        list_F1.append(f1score/n_average)
+
+
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    mpl.rcParams['font.size'] = 26.
+
+
+    kwargs = {'ms':10,'mew':2}
+
+    fig = plt.figure()
+    ax  = fig.add_subplot(111)
+    ax.plot(list_x,list_accuracy,'gx',label='Accuracy',**kwargs)
+    ax.plot(list_x,list_precision,'rs',label='Precision',**kwargs)
+    ax.plot(list_x,list_F1,'bo',label='F1 score',**kwargs)
+
+    ax.grid(True,linestyle='-',color='grey',alpha=0.5)
+    ax.legend(  loc = 0, fancybox=True,shadow=True,  borderaxespad=0.)
+    ax.set_xlabel('number of passengers for training')
+
+    #ax.set_xlabel(
+    fig.subplots_adjust(left    =       0.10,
+                        bottom  =       0.10,
+                        right   =       0.90,
+                        top     =       0.90,
+                        wspace  =       0.20,
+                        hspace  =       0.20)
+
+    
+    #plt.set_xlabel('train fracion')
+    plt.show()
+
+
+    #model.train_model(n_estimators=10)
+    #model.write_prediction( prediction_filename = 'RandomForestModel.csv')
